@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Peer-to-Peer Message Logs</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        table { width: 80%; margin: 20px auto; border-collapse: collapse; background: white; }
+        th, td { border: 1px solid black; padding: 8px; text-align: center; }
+        th { background-color: #4CAF50; color: white; }
+        .sent { background-color: #c8e6c9; }
+        .received { background-color: #ffccbc; }
+    </style>
+</head>
+<body>
+    <h2>Peer-to-Peer Message Logs (Auto-Refreshing)</h2>
+    <div id="logsContainer">Loading logs...</div>
+
+    <script>
+        function fetchLogs() {
+            fetch(`http://localhost:8081/logs`)
+                .then(response => response.json())
+                .then(data => {
+                    let logsContainer = document.getElementById("logsContainer");
+                    logsContainer.innerHTML = ""; // Clear before appending new data
+
+                    Object.keys(data).forEach(peer => {
+                        if (data[peer].length === 0) {
+                            logsContainer.innerHTML += `<h3>${peer}</h3><p>No logs available</p>`;
+                            return;
+                        }
+
+                        let tableHTML = `<h3>${peer}</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Timestamp</th>
+                                        <th>From/To</th>
+                                        <th>Message</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+
+                        data[peer].forEach(log => {
+                            let typeClass = log[0] === "Sent" ? "sent" : "received";
+                            tableHTML += `<tr class="${typeClass}">
+                                <td>${log[0]}</td>
+                                <td>${log[1]}</td>
+                                <td>${log[2]}</td>
+                                <td>${log[3]}</td>
+                            </tr>`;
+                        });
+
+                        tableHTML += "</tbody></table>";
+                        logsContainer.innerHTML += tableHTML;
+                    });
+                })
+                .catch(error => {
+                    console.error("❌ Error fetching logs:", error);
+                    document.getElementById("logsContainer").innerHTML = "<p>Error loading logs</p>";
+                });
+        }
+
+        setInterval(fetchLogs, 3000); // Auto-refresh logs every 3 seconds
+    </script>
+</body>
+</html>

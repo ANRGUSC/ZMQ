@@ -1,0 +1,9 @@
+tasks:
+  - name: Install Dependencies
+    command: pip install -r requirements.txt
+  - name: Start the System
+    command: python run_peers.py
+
+ports:
+  - port: 8080
+    onOpen: open-browser
